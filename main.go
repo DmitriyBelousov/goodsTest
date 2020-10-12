@@ -15,7 +15,7 @@ import (
 // При возникновении ошибки обработки, требуется отменить все последующие расчеты, и вернуть ошибку
 
 const (
-	limit           = 1000
+	limit           = 10000
 	concurrencySize = 5
 )
 
@@ -81,8 +81,8 @@ func main() {
 		err := consumer(numsChan, res, concurrencySize)
 		if err != nil {
 			fmt.Println(err.Error())
-			close(res)
 		}
+		close(res)
 	}()
 
 	terminator(res)
