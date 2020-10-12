@@ -32,7 +32,7 @@ func processor(i int) (int, error) {
 	if i == 10 {
 		return 0, errors.New("i hate 5")
 	}
-	time.Sleep(3 * time.Second)
+	time.Sleep(5 * time.Second)
 	return i * i, nil
 }
 
@@ -77,12 +77,13 @@ func main() {
 	numsChan := producer(limit)
 	res := make(chan int, limit)
 
-	err := consumer(numsChan, res, concurrencySize)
-	if err != nil {
-		fmt.Println(err.Error())
-		// return
-	}
-	close(res)
+	go func() {
+		err := consumer(numsChan, res, concurrencySize)
+		if err != nil {
+			fmt.Println(err.Error())
+			close(res)
+		}
+	}()
 
 	terminator(res)
 }
