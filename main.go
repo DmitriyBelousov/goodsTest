@@ -19,13 +19,18 @@ const (
 	concurrencySize = 5
 )
 
-func producer(limit int) chan int {
-	out := make(chan int, limit)
+func producer(limit int, numsChan chan int) {
+	wg := sync.WaitGroup{}
+
 	for i := 1; i <= limit; i++ {
-		out <- i
+		wg.Add(1)
+		go func(x int) {
+			numsChan <- x
+			wg.Done()
+		}(i)
 	}
-	close(out)
-	return out
+	wg.Wait()
+	close(numsChan)
 }
 
 func processor(i int) (int, error) {
@@ -74,9 +79,10 @@ func terminator(results chan int) {
 }
 
 func main() {
-	numsChan := producer(limit)
-	res := make(chan int, limit)
+	numsChan := make(chan int, limit)
+	go producer(limit, numsChan)
 
+	res := make(chan int, limit)
 	go func() {
 		err := consumer(numsChan, res, concurrencySize)
 		if err != nil {
