@@ -19,6 +19,20 @@ const (
 	concurrencySize = 5
 )
 
+func main() {
+	numsChan := producer(limit)
+	res := make(chan int, limit)
+
+	go func() {
+		if err := consumer(numsChan, res, concurrencySize); err != nil {
+			fmt.Println(err.Error())
+		}
+		close(res)
+	}()
+
+	terminator(res)
+}
+
 func producer(limit int) chan int {
 	out := make(chan int, limit)
 	for i := 1; i <= limit; i++ {
@@ -72,19 +86,4 @@ func terminator(results chan int) {
 	for i := range results {
 		fmt.Println(i)
 	}
-}
-
-func main() {
-	numsChan := producer(limit)
-	res := make(chan int, limit)
-
-	go func() {
-		err := consumer(numsChan, res, concurrencySize)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		close(res)
-	}()
-
-	terminator(res)
 }
