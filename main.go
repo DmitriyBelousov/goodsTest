@@ -49,8 +49,8 @@ func consumer(numsChan, quadsChan chan int, threadsCount int) error {
 		if len(errChan) > 0 {
 			return <-errChan
 		}
-		wg.Add(1)
 		semaphore <- struct{}{}
+		wg.Add(1)
 		go func(x int) {
 			defer wg.Done()
 			quad, err := processor(x)
